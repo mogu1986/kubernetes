@@ -1,0 +1,16 @@
+#helm install --name order-provider --namespace oms --version 0.1.1 sxh/sxh -f values.yaml
+#helm upgrade order-provider --namespace oms --version 0.1.1 sxh/sxh -f values.yaml
+
+replicaCount: 3
+nameOverride: "order-provider"
+
+image:
+  repository: ccr.ccs.tencentyun.com/sxhharbor/order-provider
+  tag: 393
+
+ports:
+  xxl:
+    enabled: true
+
+mount:
+  ssl: true

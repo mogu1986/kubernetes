@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingress-filebeat-config
+data:
+  filebeat.yml: |-
+    filebeat.inputs:
+      - type: log
+        enabled: true
+        tail_files: true
+        fields:
+          ip: '${POD_IP}'
+        paths:
+          - /logs/*.log
+        json.keys_under_root: true
+        json.overwrite_keys: true
+    filebeat.config:
+      modules:
+        path: ${path.config}/modules.d/*.yml
+        reload.enabled: false
+    setup.template:
+      name: "nginx-ingress"
+      pattern: "nginx-ingress-*"
+      overwrite: true
+    processors:
+      - add_cloud_metadata:
+    output.elasticsearch:
+      hosts: ['${ELASTICSEARCH_HOST:elasticsearch}:${ELASTICSEARCH_PORT:9200}']
+      index: "nginx-ingress-%{+yyyy.MM}"

@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: xxl-mysql
+  namespace: ops
+  labels:
+    app: xxl-mysql
+spec:
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  selector:
+    app: xxl-mysql
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: xxl-mysql
+  namespace: ops
+  labels:
+    app: xxl-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: xxl-mysql
+  template:
+    metadata:
+      labels:
+        app: xxl-mysql
+    spec:
+      containers:
+        - name: xxl-mysql
+          imagePullPolicy: IfNotPresent
+          image: mysql:5.6
+          resources:
+            limits:
+              cpu: '2'
+              memory: 4Gi
+            requests:
+              cpu: '2'
+              memory: 4Gi
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: 'root_pwd'
+            - name: TZ
+              value: 'Asia/Shanghai'
+          volumeMounts:
+            - name: volume-time
+              mountPath: /etc/localtime
+      volumes:
+        - name: volume-time
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai

@@ -1,0 +1,99 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: jumpserver-web
+  namespace: ops
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+    - host: jumpserver.shixh.com
+      http:
+        paths:
+          - backend:
+              serviceName: jumpserver-web
+              servicePort: 80
+            path: /
+  tls:
+    - hosts:
+        - jumpserver.shixh.com
+    - secretName: ssl-sxh
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jumpserver-web
+  namespace: ops
+  labels:
+    app: jumpserver-web
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: jumpserver-web
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: jumpserver-web
+  namespace: ops
+  labels:
+    app: jumpserver-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jumpserver-web
+  template:
+    metadata:
+      labels:
+        app: jumpserver-web
+    spec:
+      containers:
+        - name: jumpserver-web
+          imagePullPolicy: IfNotPresent
+          image: jumpserver/jms_all:1.5.0
+          resources:
+            limits:
+              cpu: '2'
+              memory: 4Gi
+            requests:
+              cpu: '2'
+              memory: 4Gi
+          ports:
+            - containerPort: 80
+              name: web
+              protocol: TCP
+            - containerPort: 2222
+              name: ssh
+              protocol: TCP
+          env:
+            - name: SECRET_KEY
+              value: '7iWmCY3yTta9GLBOm615lK9tvtwIo8aeBGdyBz3uY7dPfYRaw6'
+            - name: BOOTSTRAP_TOKEN
+              value: 'WvTXJK5ZjVpr69iS'
+            - name: DB_HOST
+              value: 'jumpserver-mysql'
+            - name: DB_PORT
+              value: '3306'
+            - name: DB_USER
+              value: 'root'
+            - name: DB_PASSWORD
+              value: 'root123456'
+            - name: DB_NAME
+              value: 'jumpserver'
+            - name: REDIS_HOST
+              value: 'jumpserver-redis'
+            - name: REDIS_PORT
+              value: '6379'
+            - name: REDIS_PASSWORD
+              value: ''
+          volumeMounts:
+            - mountPath: /opt/jumpserver/data/media
+              name: volume-jumpserver-pvc
+      volumes:
+        - name: volume-jumpserver-pvc
+          persistentVolumeClaim:
+            claimName: jumpserver-pvc

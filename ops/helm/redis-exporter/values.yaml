@@ -1,0 +1,10 @@
+#extraArgs:
+#  - redis.addr: 172.16.48.6
+#  - redis.password: SXH2016redis
+redisAddress: 'redis://redis-svc.ops:6379'
+
+fullnameOverride: 'redis-exporter'
+
+env:
+  - name: REDIS_PASSWORD
+    value: 'SXH2016redis'

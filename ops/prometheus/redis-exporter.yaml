@@ -1,0 +1,39 @@
+#apiVersion: extensions/v1beta1
+#kind: Deployment
+#metadata:
+#  name: redis-exporter
+#  namespace: monitoring
+#spec:
+#  template:
+#    metadata:
+#      annotations:
+#        prometheus.io/scrape: "true"
+#        prometheus.io/port: "9121"
+#      labels:
+#        app: redis-exporter
+#    spec:
+#      containers:
+#        - name: redis-exporter
+#          image: oliver006/redis_exporter:latest
+#          resources:
+#            requests:
+#              cpu: 100m
+#              memory: 100Mi
+#          ports:
+#            - containerPort: 9121
+#          args:
+#            - --redis.addr=redis-svc.ops
+#            - --redis.password=SXH2016redis
+#---
+#kind: Service
+#apiVersion: v1
+#metadata:
+#  name: redis-exporter
+#  namespace: monitoring
+#spec:
+#  selector:
+#    app: redis-exporter
+#  ports:
+#    - name: prom
+#      port: 9121
+#      targetPort: 9121

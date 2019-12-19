@@ -1,0 +1,100 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: jenkins
+  annotations:
+    kubernetes.io/ingress.class: 'nginx'
+spec:
+  tls:
+    - hosts:
+        - 'jenkins.jq.cn'
+    - secretName: 'ssl-sxh'
+  rules:
+    - host: 'jenkins.jq.cn'
+      http:
+        paths:
+          - backend:
+              serviceName: jenkins
+              servicePort: 8080
+            path: /
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins
+  labels:
+    app: jenkins
+spec:
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: jenkins
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-jnpl
+  labels:
+    app: jenkins
+spec:
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 50000
+      targetPort: 50000
+  selector:
+    app: jenkins
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: jenkins
+  labels:
+    app: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: k8s.jq.cn/group
+                    operator: In
+                    values:
+                      - ops
+      containers:
+        - name: jenkins
+          imagePullPolicy: IfNotPresent
+          image: jenkinsci/blueocean:1.19.0
+          ports:
+            - containerPort: 8080
+            - containerPort: 50000
+          securityContext:
+            runAsUser: 0
+            privileged: true
+          env:
+            - name: JAVA_OPTS
+              value: '-server -Xms2g -Xmx2g -Xmn512m -Xss512k -Duser.timezone=Asia/Shanghai'
+          volumeMounts:
+            - name: storage
+              mountPath: /var/jenkins_home
+              subPath: jenkins_home
+            - name: volume-time
+              mountPath: /etc/localtime
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: jenkins
+        - name: volume-time
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai

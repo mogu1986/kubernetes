@@ -1,0 +1,15 @@
+#helm install --name harbor --version 1.2.3 -f values.yaml --namespace ops harbor/harbor
+#helm upgrade harbor --version 1.2.3 -f values.yaml --namespace ops harbor/harbor
+expose:
+  type: ingress
+  tls:
+    enabled: false
+  ingress:
+    hosts:
+      core: harbor.jq.cn
+      notary: notary.jq.cn
+    annotations:
+      kubernetes.io/ingress.class: "nginx"
+      ingress.kubernetes.io/proxy-body-size: "0"
+
+externalURL: http://harbor.jq.cn

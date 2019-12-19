@@ -1,0 +1,1 @@
+helm install --name metallb --version 0.12.0 -f values.yaml --namespace kube-system stable/metallb

@@ -1,0 +1,66 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: head
+  namespace: log
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+    - host: head.shixh.com
+      http:
+        paths:
+          - backend:
+              serviceName: head
+              servicePort: 9100
+            path: /
+  tls:
+    - hosts:
+        - head.shixh.com
+    - secretName: ssl-sxh
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: head
+  namespace: log
+  labels:
+    app: head
+spec:
+  ports:
+    - protocol: TCP
+      port: 9100
+      targetPort: 9100
+  selector:
+    app: head
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: head
+  namespace: log
+  labels:
+    app: head
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: head
+  template:
+    metadata:
+      labels:
+        app: head
+    spec:
+      containers:
+        - name: head
+          imagePullPolicy: IfNotPresent
+          image: mobz/elasticsearch-head:5
+          resources:
+            limits:
+              cpu: '2'
+              memory: 4Gi
+            requests:
+              cpu: '2'
+              memory: 4Gi
+          ports:
+            - containerPort: 9100

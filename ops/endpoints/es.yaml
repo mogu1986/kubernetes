@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: es-svc
+  namespace: ops
+  labels:
+    app: es-svc
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9200"
+spec:
+  ports:
+    - protocol: TCP
+      port: 9200
+      targetPort: 9200
+  clusterIP: None
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: es-svc
+  namespace: ops
+subsets:
+  - addresses:
+      - ip: 172.18.255.236
+    ports:
+      - port: 9200

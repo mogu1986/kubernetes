@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jumpserver-redis
+  namespace: ops
+  labels:
+    app: jumpserver-redis
+spec:
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+  selector:
+    app: jumpserver-redis
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: jumpserver-redis
+  namespace: ops
+  labels:
+    app: jumpserver-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jumpserver-redis
+  template:
+    metadata:
+      labels:
+        app: jumpserver-redis
+    spec:
+      containers:
+        - name: jumpserver-redis
+          imagePullPolicy: IfNotPresent
+          image: redis:4.0
+          resources:
+            limits:
+              cpu: '2'
+              memory: 4Gi
+            requests:
+              cpu: '2'
+              memory: 4Gi
+          ports:
+            - containerPort: 6379
+          env:
+            - name: ALLOW_EMPTY_PASSWORD
+              value: 'yes'
+            - name: REDIS_DISABLE_COMMANDS
+              value: 'FLUSHDB,FLUSHALL'
+          volumeMounts:
+            - name: volume-time
+              mountPath: /etc/localtime
+      volumes:
+        - name: volume-time
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai

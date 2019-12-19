@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wx
+data:
+  2a21e182198d9c5d01ae3d4fc872e25b.txt: |-
+    2a21e182198d9c5d01ae3d4fc872e25b
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: wx-nginx
+  annotations:
+    kubernetes.io/ingress.class: 'nginx'
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+spec:
+  tls:
+    - hosts:
+        - 'wx.shixh.com'
+    - secretName: 'ssl-sxh'
+  rules:
+    - host: 'wx.shixh.com'
+      http:
+        paths:
+          - backend:
+              serviceName: wx-nginx
+              servicePort: 80
+            path: /
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wx-nginx
+  labels:
+    app: wx-nginx
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: wx-nginx
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: wx-nginx
+  labels:
+    app: wx-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wx-nginx
+  template:
+    metadata:
+      labels:
+        app: wx-nginx
+    spec:
+      containers:
+        - name: wx-nginx
+          imagePullPolicy: IfNotPresent
+          image: openresty/openresty:1.13.6.2-centos
+          ports:
+            - containerPort: 80
+          securityContext:
+            runAsUser: 0
+            privileged: true
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /usr/local/openresty/nginx/html/2a21e182198d9c5d01ae3d4fc872e25b.txt
+              subPath: 2a21e182198d9c5d01ae3d4fc872e25b.txt
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: wx

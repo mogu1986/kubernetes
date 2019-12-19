@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dhxt-svc
+  namespace: ops
+  labels:
+    app: dhxt-svc
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+spec:
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  clusterIP: None
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: dhxt-svc
+  namespace: ops
+subsets:
+  - addresses:
+      - ip: 172.16.64.39
+    ports:
+      - port: 8080

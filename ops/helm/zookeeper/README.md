@@ -1,0 +1,1 @@
+helm install --name zookeeper --version 2.0.0 --namespace ops incubator/zookeeper

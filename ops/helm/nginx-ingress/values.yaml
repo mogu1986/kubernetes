@@ -1,0 +1,74 @@
+nameOverride: 'nginx-ingress'
+
+controller:
+  # Will add custom configuration options to Nginx https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/
+  replicaCount: 1
+  config:
+    worker-processes: '4'
+    worker_cpu_affinity: '0001 0010 0100 1000'
+    allow-backend-server-header: 'true'
+    enable-underscores-in-headers: 'true'
+    http-redirect-code: '301'
+    max-worker-connections: '65536'
+    client_header_buffer_size: '2046k'
+    proxy-body-size: '500m'
+    proxy-connect-timeout: '10'
+    proxy-read-timeout: '300'
+    proxy-send-timeout: '300'
+    server-tokens: 'false'
+    ssl-ciphers: 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA'
+    ssl-protocols: 'TLSv1 TLSv1.1 TLSv1.2'
+    log-format-upstream: '{"time": "$time_iso8601", "remote_addr": "$proxy_protocol_addr", "x-forward-for": "$proxy_add_x_forwarded_for", "request_id": "$req_id","remote_user": "$remote_user", "bytes_sent": $bytes_sent, "request_time": $request_time, "status":$status, "vhost": "$host", "request_proto": "$server_protocol","path": "$uri", "request_query": "$args", "request_length": $request_length, "duration": $request_time,"method": "$request_method", "http_referrer": "$http_referer","http_user_agent": "$http_user_agent" }'
+
+  hostNetwork: true
+
+#  resources:
+#    limits:
+#      cpu: 0.5
+#      memory: 4Gi
+#    requests:
+#      cpu: 0.1
+#      memory: 4Gi
+
+
+#  extraContainers:
+#    - name: filebeat
+#      image: docker.elastic.co/beats/filebeat:6.7.0
+#      imagePullPolicy: IfNotPresent
+#      args: [
+#        "-c", "/etc/filebeat.yml",
+#        "-e",
+#      ]
+#      env:
+#        - name: POD_IP
+#          valueFrom:
+#            fieldRef:
+#              apiVersion: v1
+#              fieldPath: status.podIP
+#        - name: ELASTICSEARCH_HOST
+#          value: "elasticsearch-client.log"
+#        - name: ELASTICSEARCH_PORT
+#          value: "9200"
+#      securityContext:
+#        runAsUser: 0
+#        privileged: true
+#      volumeMounts:
+#        - name: config
+#          mountPath: /etc/filebeat.yml
+#          subPath: filebeat.yml
+#          readOnly: true
+#        - name: app-logs
+#          mountPath: /logs
+#
+#  extraVolumeMounts:
+#    - name: app-logs
+#      mountPath: /var/log/nginx
+#
+#  extraVolumes:
+#    - name: app-logs
+#      emptyDir: {}
+
+#    - name: config
+#      configMap:
+#        defaultMode: 0600
+#        name: ingress-filebeat-config

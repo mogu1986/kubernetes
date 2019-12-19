@@ -1,0 +1,1 @@
+helm install --name jenkins -f values.yaml --namespace ops stable/jenkins

@@ -1,0 +1,85 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: zipkin
+  namespace: ops
+  annotations:
+    kubernetes.io/ingress.class: 'nginx'
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: 'basic-auth'
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication-Required"
+spec:
+  tls:
+    - hosts:
+        - 'zipkin.shixh.com'
+    - secretName: 'ssl-sxh'
+  rules:
+    - host: 'zipkin.shixh.com'
+      http:
+        paths:
+          - backend:
+              serviceName: zipkin
+              servicePort: 9411
+            path: /
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zipkin
+  namespace: ops
+  labels:
+    app: zipkin
+spec:
+  ports:
+    - protocol: TCP
+      port: 9411
+      targetPort: 9411
+  selector:
+    app: zipkin
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: zipkin
+  namespace: ops
+  labels:
+    app: zipkin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zipkin
+  template:
+    metadata:
+      labels:
+        app: zipkin
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: k8s.shixh.com/group
+                    operator: In
+                    values:
+                      - ops
+      containers:
+        - name: zipkin
+          imagePullPolicy: IfNotPresent
+          image: openzipkin/zipkin:2.15
+          ports:
+            - containerPort: 9411
+          resources:
+            limits:
+              cpu: '1'
+              memory: 4Gi
+            requests:
+              cpu: '1'
+              memory: 4Gi
+          env:
+            - name: STORAGE_TYPE
+              value: 'elasticsearch'
+            - name: ES_HOSTS
+              value: 'http://root:Husj!316@172.16.64.25:9200'

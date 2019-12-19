@@ -1,0 +1,79 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: dubbo-admin
+  namespace: ops
+  annotations:
+    kubernetes.io/ingress.class: 'nginx'
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      if ( $http_referer ~* (.*)/(.*)) {
+        set $httpreferer $1;
+      }
+
+      if ( $http_referer ~* (.*)/(.*)/(.*)/(.*)/(.*)) {
+        set $httpreferer $1;
+      }
+    nginx.ingress.kubernetes.io/cors-allow-origin: "$httpreferer"
+spec:
+  tls:
+    - hosts:
+        - 'dubbo.shixhsit.com'
+    - secretName: 'ssl-sxh'
+  rules:
+    - host: 'dubbo.shixhsit.com'
+      http:
+        paths:
+          - backend:
+              serviceName: dubbo-admin
+              servicePort: 8080
+            path: /
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dubbo-admin
+  namespace: ops
+  labels:
+    app: dubbo-admin
+spec:
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: dubbo-admin
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: dubbo-admin
+  namespace: ops
+  labels:
+    app: dubbo-admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dubbo-admin
+  template:
+    metadata:
+      labels:
+        app: dubbo-admin
+    spec:
+      containers:
+        - name: dubbo-admin
+          imagePullPolicy: IfNotPresent
+          image: harbor.shixhlocal.com/library/dubbo-admin:0.2.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: admin.registry.address
+              value: 'zookeeper://zookeeper.ops:2181'
+            - name: admin.config-center
+              value: 'zookeeper://zookeeper.ops:2181'
+            - name: admin.metadata-report.address
+              value: 'zookeeper://zookeeper.ops:2181'
+

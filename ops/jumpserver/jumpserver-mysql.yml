@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jumpserver-mysql
+  namespace: ops
+  labels:
+    app: jumpserver-mysql
+spec:
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  selector:
+    app: jumpserver-mysql
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: jumpserver-mysql
+  namespace: ops
+  labels:
+    app: jumpserver-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jumpserver-mysql
+  template:
+    metadata:
+      labels:
+        app: jumpserver-mysql
+    spec:
+      containers:
+        - name: jumpserver-mysql
+          imagePullPolicy: IfNotPresent
+          image: mysql:5.7
+          resources:
+            limits:
+              cpu: '2'
+              memory: 4Gi
+            requests:
+              cpu: '2'
+              memory: 4Gi
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_DATABASE
+              value: 'jumpserver'
+            - name: MYSQL_ROOT_PASSWORD
+              value: 'root123456'
+            - name: TZ
+              value: 'Asia/Shanghai'
+          volumeMounts:
+            - name: volume-time
+              mountPath: /etc/localtime
+      volumes:
+        - name: volume-time
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai

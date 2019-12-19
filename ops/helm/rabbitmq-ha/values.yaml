@@ -1,0 +1,22 @@
+#helm install --name mq --version 1.5.0 -f values.yaml --namespace ops stable/rabbitmq-ha
+#helm upgrade mq --version 1.5.0 -f values.yaml --namespace ops stable/rabbitmq-ha
+
+rabbitmqUsername: guest
+rabbitmqPassword: harbor
+
+## RabbitMQ Management user used for health checks
+managementUsername: management
+managementPassword: harbor
+
+service:
+  type: LoadBalancer
+
+persistentVolume:
+  enabled: true
+
+ingress:
+  enabled: true
+  path: /
+  hostName: mq.jq.cn
+  annotations:
+    kubernetes.io/ingress.class: 'nginx'

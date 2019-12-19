@@ -1,0 +1,48 @@
+#helm install --name yqm-front-admin --namespace yqm sxh/sxh --version 0.1.1 -f values.yaml
+#helm upgrade yqm-front-admin --namespace yqm sxh/sxh --version 0.1.1 -f values.yaml
+
+replicaCount: 1
+
+image:
+  repository: ccr.ccs.tencentyun.com/sxhharbor/yqm-front-admin
+  tag: 73
+
+nameOverride: "yqm-front-admin"
+
+args: {}
+
+resources:
+  limits:
+    cpu: '4'
+    memory: 8Gi
+  requests:
+    cpu: '4'
+    memory: 8Gi
+
+service:
+  enabled: true
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: 'nginx'
+    nginx.ingress.kubernetes.io/enable-cors: 'false'
+    nginx.ingress.kubernetes.io/ssl-redirect: 'false'
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'false'
+  path: /
+  hosts:
+    - dhxt.shixh.com
+
+log:
+  enabled: true
+  path: /usr/local/openresty/nginx/logs
+
+extraVolumeMounts:
+  - name: yqm-nginx-conf
+    mountPath: /usr/local/openresty/nginx/conf/nginx.conf
+    subPath: nginx.conf
+
+extraVolumes:
+  - name: yqm-nginx-conf
+    configMap:
+      name: yqm-nginx-conf

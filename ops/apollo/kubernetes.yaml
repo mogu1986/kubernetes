@@ -1,0 +1,54 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: apollo
+  namespace: ops
+  annotations:
+    kubernetes.io/ingress.class: 'nginx'
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+spec:
+  tls:
+    - hosts:
+        - 'apollo.shixh.com'
+    - secretName: 'ssl-sxh'
+  rules:
+    - host: 'apollo.shixh.com'
+      http:
+        paths:
+          - backend:
+              serviceName: apollo
+              servicePort: 8070
+            path: /
+    - host: 'apolloqcloud.shixh.com'
+      http:
+        paths:
+          - backend:
+              serviceName: apollo
+              servicePort: 8070
+            path: /
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apollo
+  namespace: ops
+  labels:
+    app: apollo
+spec:
+  ports:
+    - protocol: TCP
+      port: 8070
+      targetPort: 8070
+  clusterIP: None
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: apollo
+  namespace: ops
+subsets:
+  - addresses:
+      - ip: 172.16.64.29
+    ports:
+      - port: 8070

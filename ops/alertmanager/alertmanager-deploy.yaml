@@ -1,0 +1,46 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: alertmanager
+  namespace: monitoring
+  labels:
+    app: alertmanager
+spec:
+  template:
+    metadata:
+      labels:
+        app: alertmanager
+    spec:
+      containers:
+        - name: alertmanager
+          image: prom/alertmanager:v0.19.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--config.file=/etc/alertmanager/config.yml"
+            - "--storage.path=/alertmanager/data"
+          ports:
+            - containerPort: 9093
+              name: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+          volumeMounts:
+            - mountPath: "/etc/alertmanager"
+              name: alertcfg
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: k8s.shixh.com/group
+                    operator: In
+                    values:
+                      - ops
+      volumes:
+        - name: alertcfg
+          configMap:
+            name: alert-config

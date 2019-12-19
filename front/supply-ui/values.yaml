@@ -1,0 +1,47 @@
+#helm install --name supply-ui --namespace front sxh/sxh --version 0.1.1 -f values.yaml
+#helm upgrade supply-ui --namespace front sxh/sxh --version 0.1.1 -f values.yaml
+
+replicaCount: 1
+
+image:
+  repository: ccr.ccs.tencentyun.com/sxhharbor/supply-ui
+  tag: 42
+
+nameOverride: "supply-ui"
+
+args: {}
+
+env: []
+
+ports:
+  http:
+    enabled: true
+  dubbo:
+    enabled: false
+
+service:
+  enabled: true
+
+ingress:
+  enabled: true
+  path: /
+  hosts:
+    - sp.shixh.com
+  tls:
+    - secretName: ssl-sxh
+      hosts:
+        - sp.shixh.com
+
+log:
+  enabled: true
+  path: /usr/local/openresty/nginx/logs
+
+extraVolumeMounts:
+  - name: supplyui-nginx-conf
+    mountPath: /usr/local/openresty/nginx/conf/nginx.conf
+    subPath: nginx.conf
+
+extraVolumes:
+  - name: supplyui-nginx-conf
+    configMap:
+      name: supplyui-nginx-conf

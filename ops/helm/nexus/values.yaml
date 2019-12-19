@@ -1,0 +1,16 @@
+#helm install --name nexus --version 1.19.0 -f values.yaml --namespace ops stable/sonatype-nexus
+
+nexus:
+  service:
+    type: ClusterIP
+
+
+nexusProxy:
+  enabled: true
+  env:
+    nexusHttpHost: nexus.jq.cn
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: 'nginx'

@@ -1,0 +1,25 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-svc
+  namespace: ops
+  labels:
+    app: redis-svc
+spec:
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+  clusterIP: None
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: redis-svc
+  namespace: ops
+subsets:
+  - addresses:
+      - ip: 172.16.48.6
+    ports:
+      - port: 6379
