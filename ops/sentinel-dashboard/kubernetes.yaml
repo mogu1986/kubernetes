@@ -1,0 +1,69 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: sentinel-dashboard
+  namespace: ops
+  annotations:
+    kubernetes.io/ingress.class: 'nginx'
+spec:
+  rules:
+    - host: 'sentinel.jq.cn'
+      http:
+        paths:
+          - backend:
+              serviceName: sentinel-dashboard
+              servicePort: 8080
+            path: /
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentinel-dashboard
+  namespace: ops
+  labels:
+    app: sentinel-dashboard
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+spec:
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: sentinel-dashboard
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: sentinel-dashboard
+  namespace: ops
+spec:
+  selector:
+    matchLabels:
+      app: sentinel-dashboard
+  template:
+    metadata:
+      labels:
+        app: sentinel-dashboard
+    spec:
+      containers:
+        - name: sentinel-dashboard
+          imagePullPolicy: IfNotPresent
+          image: harbor.jq.cn/library/sentinel-dashboard:1.5.2
+#          resources:
+#            limits:
+#              cpu: 0.3
+#              memory: 1000Mi
+          ports:
+            - containerPort: 8080
+            - containerPort: 8719
+          env:
+            - name: JAVA_OPTS
+              value: >-
+                -XX:ActiveProcessorCount=1
+                -Dserver.port=8080
+                -Dcsp.sentinel.dashboard.server=localhost:8080
+                -Dproject.name=sentinel-dashboard
+                -Djava.security.egd=file:/dev/./urandom
+                -Dcsp.sentinel.api.port=8719
