@@ -6,12 +6,8 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: 'nginx'
 spec:
-  tls:
-    - hosts:
-        - 'xxljob.shixhsit.com'
-    - secretName: 'ssl-sxh'
   rules:
-    - host: 'xxljob.shixhsit.com'
+    - host: 'xxljob.jq.cn'
       http:
         paths:
           - backend:
@@ -55,30 +51,18 @@ spec:
       containers:
         - name: xxljob
           imagePullPolicy: IfNotPresent
-          image: harbor.shixhlocal.com/library/xxl-job:2.0.2-SNAPSHOT
-          resources:
-            limits:
-              cpu: 0.3
-              memory: 1000Mi
+          image: xuxueli/xxl-job-admin:2.1.2
           ports:
             - containerPort: 8080
           env:
-            - name: JAVA_OPTS
-              value: >-
-                -server
-                -XX:ActiveProcessorCount=1
-                -Dspring.datasource.url=jdbc:mysql://10.50.4.114:3306/xxl_job?Unicode=true&characterEncoding=UTF-8
-                -Dspring.datasource.username=bl_sxh_dev_user
-                -Dspring.datasource.password=nAFHbchS
-                -Dxxl.job.accessToken=FuZpyVhPs50NWllkY3hcG79l0Vs2Uuv8sit
+            - name: PARAMS
+              valueFrom:
+                secretKeyRef:
+                  name: xxljob
+                  key: params
           volumeMounts:
             - name: app-logs
               mountPath: /data
-            - name: volume-time
-              mountPath: /etc/localtime
       volumes:
         - name: app-logs
           emptyDir: {}
-        - name: volume-time
-          hostPath:
-            path: /usr/share/zoneinfo/Asia/Shanghai

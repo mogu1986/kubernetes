@@ -1,0 +1,11 @@
+env:
+  LDAP_TLS: "false"
+
+service:
+  ldapPort: 389
+  sslLdapPort: 636
+  type: LoadBalancer
+
+
+persistence:
+  enabled: true

@@ -1,0 +1,46 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: jenkins
+  namespace: ops
+  annotations:
+    kubernetes.io/ingress.class: 'nginx'
+    kubernetes.io/tls-acme: "true"
+spec:
+  tls:
+    - hosts:
+        - jenkins.jq.cn
+      secretName: ssl-jenkins
+  rules:
+    - host: 'jenkins.jq.cn'
+      http:
+        paths:
+          - backend:
+              serviceName: jenkins
+              servicePort: 8081
+            path: /
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins
+  namespace: ops
+  labels:
+    app: jenkins
+spec:
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+  clusterIP: None
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: jenkins
+  namespace: ops
+subsets:
+  - addresses:
+      - ip: 192.168.123.176
+    ports:
+      - port: 8081
