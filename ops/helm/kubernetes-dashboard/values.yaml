@@ -28,7 +28,7 @@ service:
   type: LoadBalancer
 
 ingress:
-  enabled: false
+  enabled: true
 
   ## Kubernetes Dashboard Ingress annotations
   ##
@@ -44,8 +44,8 @@ ingress:
 #    nginx.ingress.kubernetes.io/secure-backends: "true"
   # if you use ingress-nginx >= 0.21.0
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-#    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-#    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
 
   ## Kubernetes Dashboard Ingress paths
   ##
